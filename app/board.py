@@ -1,4 +1,4 @@
-from typing import Generator, Tuple
+from typing import Generator, Tuple, List
 from random import randrange
 
 
@@ -20,7 +20,7 @@ class Board:
 
         self._set_bombs()
 
-    def set_flag(self, row: int, column: int) -> bool:
+    def set_flag(self, row: int, column: int) -> None:
         cell_value = self.exposed[row][column]
         if cell_value != None and cell_value != FLAG:
             return
@@ -29,7 +29,7 @@ class Board:
 
         self._update(row, column, value)
 
-    def expose(self, row: int, column: int) -> bool:
+    def expose(self, row: int, column: int) -> None:
         if self.exposed[row][column] != None:
             return
 
@@ -40,6 +40,12 @@ class Board:
         if value == 0:
             for i, j in self._iterate_block(row, column):
                 self.expose(i, j)
+
+    def expose_bombs(self) -> None:
+        for i in range(self.size):
+            for j in range(self.size):
+                if self._bombs[i][j] and not self.exposed[i][j]:
+                    self._update(i, j , BOMB)
 
     def _update(self, row: int, column: int, value: int) -> None:
         old = self.exposed[row][column]
@@ -70,7 +76,7 @@ class Board:
             for j in range(starting_column, ending_column + 1):
                 yield i, j
 
-    def _set_bombs(self):
+    def _set_bombs(self) -> None:
         for i in range(self.num_of_bombs):
             row, column = randrange(self.size), randrange(self.size)
             while self._bombs[row][column]:

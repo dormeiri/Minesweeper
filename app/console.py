@@ -1,12 +1,12 @@
 from board import Board, FLAG, BOMB
-import os
+from colorama import Fore, Style
 
 
-SEPERATOR = ' '
+SEPERATOR = '\t'
 CELL_DISPLAY_MAP = {
-    FLAG: 'F',
-    None: '-',
-    BOMB: '*'
+    FLAG: Fore.GREEN + 'F',
+    None: Fore.WHITE + '-',
+    BOMB: Fore.RED + '*'
 }
 
 
@@ -18,22 +18,27 @@ class Console:
     def __init__(self, board: Board):
         self.board = board
 
+    def print_status(self):
+        print(f'Flags: {self.board.num_of_bombs - self.board.num_of_flags}')
+
     def print_end(self, game_over):
-        print('Game over' if game_over else 'You won!')
+        self.board.expose_bombs()
+        self.show_board()
+
+        print('Game over!' if game_over else 'You won!')
 
     def show_board(self):
-        print('\\', end="\t")
-        for i in range(self.board.size):
-            print(i, end=SEPERATOR)
-
-        print()
+        print('\n ', end='\t')
+        print(*range(self.board.size), sep=SEPERATOR, end='\n\n')
 
         for i in range(self.board.size):
             row = self.board.exposed[i]
             row_display = map(Console._convert_value_to_display, row)
 
             print(i, end='\t')
-            print(SEPERATOR.join(row_display), end='\n')
+            print(*row_display, sep=SEPERATOR)
+
+        print(Style.RESET_ALL)
 
     def move_input(self):
         try:
@@ -59,10 +64,10 @@ class Console:
 
         value = int(value)
         if value < 0 or value >= self.board.size:
-            raise InvalidInputException()  # TODO: Specific exception type
+            raise InvalidInputException()
 
         return value
 
     @staticmethod
     def _convert_value_to_display(value):
-        return str(CELL_DISPLAY_MAP.get(value, value))
+        return str(CELL_DISPLAY_MAP.get(value, Fore.WHITE + str(value)))
